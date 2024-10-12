@@ -22,3 +22,13 @@ variable "root_volume_size" {
   type        = number
   default     = 8
 }
+
+variable "vpc_id" {
+  description = "Default VPC Group"
+  default     = "vpc-04c5017b2ef74457f"
+}
+
+variable "security_group_name" {
+  description = "EC2 Security Group"
+  default     = "ec2-sg"
+}

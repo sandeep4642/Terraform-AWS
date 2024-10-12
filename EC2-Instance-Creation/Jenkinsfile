@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'VM_NAME', defaultValue: 'MyEC2Instance', description: 'Name of the EC2 instance')
+        string(name: 'ROOT_VOLUME_SIZE', defaultValue: '8', description: 'Root volume size in GB')
+    }
+
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/sandeep4642/Terraform-AWS/'
+            }
+        }        
+        stage('Terraform Init') {
+            steps {
+                dir('EC2-Instance-Creation') {
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                dir('EC2-Instance-Creation') {
+                    sh """
+                    terraform plan \
+                    -var 'vm_name=${VM_NAME}' \
+                    -var 'root_volume_size=${ROOT_VOLUME_SIZE}'
+                    """
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                dir('EC2-Instance-Creation') {
+                    sh """
+                    terraform apply -auto-approve \
+                    -var 'vm_name=${VM_NAME}' \
+                    -var 'root_volume_size=${ROOT_VOLUME_SIZE}'
+                    """
+                }
+            }
+        }
+    }
+
+}
