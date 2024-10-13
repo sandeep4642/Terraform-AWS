@@ -1,19 +1,27 @@
-data "aws_security_group" "existing_ec2_sg" {
+# Data block to check if the security group already exists
+data "aws_security_groups" "existing_ec2_sg" {
   filter {
-    name   = "ec2-sg"
+    name   = "group-name"
     values = [var.security_group_name]
   }
 
-  # The VPC ID where the security group is located (optional, but recommended)
-  vpc_id = var.vpc_id
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
-# Create security group if it doesn't exist
-resource "aws_security_group" "ec2_sg" {
-  count = length(data.aws_security_group.existing_ec2_sg.id) == 0 ? 1 : 0
+# Local variable to check if security group exists
+locals {
+  create_security_group = length(data.aws_security_groups.existing_ec2_sg.ids) == 0
+}
 
+# Create security group if it does not exist
+resource "aws_security_group" "ec2_sg" {
+  count       = local.create_security_group ? 1 : 0
   name        = var.security_group_name
-  description = "Security group for EC2 instance"
+  description = "Security group for EC2 instances"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 22
@@ -35,8 +43,6 @@ resource "aws_security_group" "ec2_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]  # Allow all outbound traffic
   }
-
-  vpc_id = var.vpc_id
 
   tags = {
     Name = var.security_group_name

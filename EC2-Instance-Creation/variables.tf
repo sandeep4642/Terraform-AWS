@@ -18,10 +18,11 @@ variable "vm_name" {
 }
 
 variable "root_volume_size" {
-  description = "Root volume size in GB"
+  description = "Size of the root volume"
   type        = number
-  default     = 8
+  default     = 8  # Example default size in GB
 }
+
 
 variable "vpc_id" {
   description = "Default VPC Group"
@@ -30,5 +31,5 @@ variable "vpc_id" {
 
 variable "security_group_name" {
   description = "EC2 Security Group"
-  default     = "ec2-sg"
+  default     = "EC2-security-group"
 }
